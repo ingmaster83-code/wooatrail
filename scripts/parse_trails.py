@@ -43,6 +43,40 @@ def parse_distance(v: str):
     return float(m.group()) if m else 0.0
 
 
+def parse_minutes(s: str):
+    """소요시간 문자열에서 분 단위 숫자를 최대한 파싱. 애매하면 None(스킵)."""
+    if not s:
+        return None
+    s = s.strip()
+    m = re.match(r"^(\d+)\s*일", s)
+    if m:
+        return int(m.group(1)) * 1440
+    m = re.match(r"^(\d+)\s*시간\s*(\d+)?\s*분?", s)
+    if m:
+        h = int(m.group(1))
+        mm = int(m.group(2)) if m.group(2) else 0
+        return h * 60 + mm
+    m = re.match(r"^(\d+)\s*분$", s)
+    if m:
+        return int(m.group(1))
+    m = re.match(r"^([\d.]+)\s*H$", s, re.I)
+    if m:
+        return float(m.group(1)) * 60
+    m = re.match(r"^(\d+):(\d+)$", s)
+    if m:
+        return int(m.group(1)) * 60 + int(m.group(2))
+    return None
+
+
+def is_implausible_pace(distance_km: float, duration: str, max_kmh: float = 100.0) -> bool:
+    """거리/소요시간으로 계산한 속도가 도보·자전거 코스로 불가능한 수준이면 True."""
+    mins = parse_minutes(duration)
+    if not mins or mins <= 0 or distance_km <= 0:
+        return False
+    pace = distance_km / (mins / 60)
+    return pace > max_kmh
+
+
 def main():
     raw = json.loads(SRC.read_text(encoding="utf-8"))
     records = raw["records"]
@@ -67,13 +101,19 @@ def main():
             slug = f"{slug}-{i}"
         seen_slugs.add(slug)
 
+        duration = (r.get("총소요시간") or "").strip()
+        distance_km = parse_distance(r.get("총길이"))
+        if is_implausible_pace(distance_km, duration):
+            print(f"  [이상치 제외] {name}: {distance_km}km / {duration}")
+            distance_km = 0.0
+
         trails.append({
             "id": i,
             "slug": slug,
             "name": name,
             "intro": (r.get("길소개") or "").strip(),
-            "distanceKm": parse_distance(r.get("총길이")),
-            "duration": (r.get("총소요시간") or "").strip(),
+            "distanceKm": distance_km,
+            "duration": duration,
             "startName": (r.get("시작지점명") or "").strip(),
             "startAddr": start_road or start_addr,
             "endName": (r.get("종료지점명") or "").strip(),
