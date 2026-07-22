@@ -1,0 +1,6 @@
+mountain/
+_extracted/
+_extracted2/
+*.json.bak
+_site/
+.jekyll-cache/

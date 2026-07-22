@@ -1,0 +1,124 @@
+---
+layout: default
+---
+
+<div class="camp-page">
+
+  <!-- 브레드크럼 -->
+  <nav class="breadcrumb" aria-label="위치">
+    <a href="/">홈</a>
+    <span>›</span>
+    <a href="/region/{{ page.doNm | uri_escape }}/">{{ page.doNm }}</a>
+    <span>›</span>
+    <span>{{ page.trailName }}</span>
+  </nav>
+
+  <!-- 헤더 -->
+  <div class="camp-header">
+    <div class="camp-tags">
+      {% if page.doNm and page.doNm != "" %}
+      <span class="tag tag-type">📍 {{ page.doNm }} {{ page.sigunguNm }}</span>
+      {% endif %}
+      {% if page.distanceKm and page.distanceKm != 0 %}
+      <span class="tag tag-env">📏 {{ page.distanceKm }}km</span>
+      {% endif %}
+      {% if page.duration and page.duration != "" %}
+      <span class="tag tag-safe">⏱️ {{ page.duration }}</span>
+      {% endif %}
+    </div>
+    <h1 class="camp-title">{{ page.trailName }}</h1>
+    {% if page.intro and page.intro != "" %}
+    <p style="color:#6B7280;margin-top:8px;line-height:1.6">{{ page.intro }}</p>
+    {% endif %}
+  </div>
+
+  <!-- 광고 -->
+  <div class="ad-slot">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6464921081676309" data-ad-slot="7080296704" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- 코스 정보 -->
+  <div class="camp-section">
+    <h2>🗺️ 코스 정보</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:.92rem;">
+      {% if page.startName and page.startName != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;width:110px;">시작 지점</td><td>{{ page.startName }}{% if page.startAddr and page.startAddr != "" %} ({{ page.startAddr }}){% endif %}</td></tr>
+      {% endif %}
+      {% if page.endName and page.endName != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">종료 지점</td><td>{{ page.endName }}{% if page.endAddr and page.endAddr != "" %} ({{ page.endAddr }}){% endif %}</td></tr>
+      {% endif %}
+      {% if page.distanceKm and page.distanceKm != 0 %}
+      <tr><td style="padding:8px 0;color:#6B7280;">총 거리</td><td>{{ page.distanceKm }}km</td></tr>
+      {% endif %}
+      {% if page.duration and page.duration != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">소요 시간</td><td>{{ page.duration }}</td></tr>
+      {% endif %}
+      {% if page.manager and page.manager != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">관리 기관</td><td>{{ page.manager }}{% if page.managerTel and page.managerTel != "" %} · <a href="tel:{{ page.managerTel }}">{{ page.managerTel }}</a>{% endif %}</td></tr>
+      {% endif %}
+    </table>
+  </div>
+
+  <!-- 경로 -->
+  {% if page.routeInfo and page.routeInfo != "" %}
+  <div class="camp-section">
+    <h2>🚶 경로</h2>
+    <p style="line-height:1.8">{{ page.routeInfo }}</p>
+  </div>
+  {% endif %}
+
+  <!-- 근처 공영주차장 -->
+  <div class="camp-section">
+    <a href="https://wooaparking.wooahouse.com/지역/{{ page.doNm | uri_escape }}/{{ page.sigunguNm | uri_escape }}.html"
+       target="_blank" rel="noopener" class="reserve-btn secondary">
+      🅿️ {{ page.sigunguNm }} 근처 공영주차장 보기 (우아파킹)
+    </a>
+  </div>
+
+  <!-- 같은 지역 다른 길 -->
+  <div class="region-camps">
+    <h2>📍 {{ page.doNm }} 다른 길</h2>
+    <div id="regionTrailsGrid" class="camp-grid"></div>
+    <p style="margin-top:16px;">
+      <a href="/region/{{ page.doNm | uri_escape }}/">{{ page.doNm }} 길 전체 보기 →</a>
+    </p>
+  </div>
+
+  <!-- Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    "name": "{{ page.trailName | escape }}",
+    "description": "{{ page.description | escape }}",
+    "address": {
+      "@type": "PostalAddress",
+      "addressRegion": "{{ page.doNm | escape }}",
+      "addressLocality": "{{ page.sigunguNm | escape }}"
+    }
+  }
+  </script>
+
+</div>
+
+<script>
+(async () => {
+  const currentSlug = {{ page.slug | jsonify }};
+  const currentDo = {{ page.doNm | jsonify }};
+  try {
+    const resp = await fetch('/search_index.json');
+    const all = await resp.json();
+    const regionTrails = all.filter(t => t.doNm === currentDo && t.slug !== currentSlug).slice(0, 6);
+    if (regionTrails.length > 0) {
+      document.getElementById('regionTrailsGrid').innerHTML = regionTrails.map(t => `
+        <a class="camp-card" href="/trail/${t.slug}/">
+          <div class="camp-card-body">
+            <div class="camp-card-name">${t.name}</div>
+            <div class="camp-card-loc">📍 ${t.sigunguNm || ''} · 📏 ${t.distanceKm}km</div>
+          </div>
+        </a>`).join('');
+    }
+  } catch(e) {}
+})();
+</script>

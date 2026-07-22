@@ -1,0 +1,34 @@
+title: 우아트레일 - 전국 길·둘레길 정보
+description: >-
+  전국 둘레길·트레킹길·숲길 정보를 한눈에. 거리, 소요시간, 시작/종료 지점까지
+  공공데이터 기반 신뢰할 수 있는 길 정보.
+url: "https://wooatrail.wooahouse.com"
+baseurl: ""
+lang: ko
+timezone: Asia/Seoul
+author: WooaHouse
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - scripts/
+  - "*.py"
+  - "*.log"
+  - "*.txt"
+  - README.md
+  - .gitignore
+  - vendor/
+  - manual/
+  - mountain/
+  - _rawdata/
+  - _extracted/
+  - _extracted2/
