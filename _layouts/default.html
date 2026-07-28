@@ -17,6 +17,7 @@
   <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
   {% endif %}
   <meta property="og:url" content="{{ page.url | absolute_url }}">
+  <meta property="og:image" content="{{ page.image | default: '/assets/og-image.png' | absolute_url }}">
   <meta property="og:site_name" content="우아트레일">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="naver-site-verification" content="b9c0a1afe7adde8b4fc64748d1b2fcb6d03f0244" />
