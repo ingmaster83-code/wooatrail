@@ -41,7 +41,7 @@ layout: default
         </div>
       </a>
       {% assign item_counter = item_counter | plus: 1 %}
-      {% assign item_rem = item_counter | modulo: 12 %}
+      {% assign item_rem = item_counter | modulo: 24 %}
       {% if item_rem == 0 %}
     </div>
     <div class="ad-slot">
@@ -73,7 +73,7 @@ layout: default
         </div>
       </a>
       {% assign m_counter = m_counter | plus: 1 %}
-      {% assign m_rem = m_counter | modulo: 12 %}
+      {% assign m_rem = m_counter | modulo: 24 %}
       {% if m_rem == 0 %}
     </div>
     <div class="ad-slot">
