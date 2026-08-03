@@ -1,0 +1,149 @@
+---
+layout: default
+---
+
+<div class="page-with-sidebar">
+<div class="camp-page">
+
+  <!-- 브레드크럼 -->
+  <nav class="breadcrumb" aria-label="위치">
+    <a href="/">홈</a>
+    <span>›</span>
+    <a href="/region/{{ page.doNm | uri_escape }}/">{{ page.doNm }}</a>
+    <span>›</span>
+    <span>{{ page.mountainName }}</span>
+  </nav>
+
+  <div class="gallery" id="gallery">
+    {% if page.image and page.image != "" %}
+    <img class="gallery-main" src="{{ page.image }}" alt="{{ page.mountainName }}" loading="eager">
+    {% else %}
+    <div class="gallery-placeholder">⛰️</div>
+    {% endif %}
+  </div>
+
+  <!-- 헤더 -->
+  <div class="camp-header">
+    <div class="camp-tags">
+      <span class="tag tag-type">📍 {{ page.doNm }} {{ page.sigunguNm }}</span>
+      <span class="tag tag-env">⛰️ 산/오름</span>
+    </div>
+    <h1 class="camp-title">{{ page.mountainName }}</h1>
+    {% if page.address and page.address != "" %}
+    <p style="color:#6B7280;margin-top:8px;line-height:1.6">📍 {{ page.address }}</p>
+    {% endif %}
+  </div>
+
+  <!-- 광고 -->
+  <div class="ad-slot">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6464921081676309" data-ad-slot="7080296704" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- 소개 -->
+  {% if page.overview and page.overview != "" %}
+  <div class="camp-section">
+    <h2>⛰️ 소개</h2>
+    <p style="line-height:1.8;white-space:pre-line;">{{ page.overview }}</p>
+  </div>
+  {% endif %}
+
+  <!-- 이용 정보 -->
+  {% if page.usetime and page.usetime != "" or page.restdate and page.restdate != "" or page.parking and page.parking != "" %}
+  <div class="camp-section">
+    <h2>이용 정보</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:.92rem;">
+      {% if page.usetime and page.usetime != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;width:110px;vertical-align:top;">이용시간</td><td style="white-space:pre-line;">{{ page.usetime }}</td></tr>
+      {% endif %}
+      {% if page.restdate and page.restdate != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;vertical-align:top;">휴무일</td><td style="white-space:pre-line;">{{ page.restdate }}</td></tr>
+      {% endif %}
+      {% if page.parking and page.parking != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">주차</td><td>{{ page.parking }}</td></tr>
+      {% endif %}
+    </table>
+  </div>
+  {% endif %}
+
+  {% if page.latitude and page.latitude != "" %}
+  <div class="camp-section">
+    <a href="https://map.kakao.com/link/map/{{ page.mountainName | url_encode }},{{ page.latitude }},{{ page.longitude }}" target="_blank" rel="noopener" class="reserve-btn secondary">
+      🗺️ 카카오맵으로 위치 보기
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- 근처 공영주차장 -->
+  <div class="camp-section">
+    <a href="https://wooaparking.wooahouse.com/지역/{{ page.doNm | uri_escape }}/{{ page.sigunguNm | uri_escape }}.html"
+       target="_blank" rel="noopener" class="reserve-btn secondary">
+      🅿️ {{ page.sigunguNm }} 근처 공영주차장 보기 (우아파킹)
+    </a>
+  </div>
+
+  <!-- 같은 지역 -->
+  <div class="region-camps">
+    <h2>📍 {{ page.doNm }} 다른 산·오름·길</h2>
+    <div id="regionMountainGrid" class="camp-grid"></div>
+    <p style="margin-top:16px;">
+      <a href="/region/{{ page.doNm | uri_escape }}/">{{ page.doNm }} 전체 보기 →</a>
+    </p>
+  </div>
+
+  <!-- Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    "name": "{{ page.mountainName | escape }}",
+    "address": {
+      "@type": "PostalAddress",
+      "addressRegion": "{{ page.doNm | escape }}",
+      "addressLocality": "{{ page.sigunguNm | escape }}"
+    }{% if page.latitude and page.latitude != "" %},
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": {{ page.latitude }},
+      "longitude": {{ page.longitude }}
+    }{% endif %}{% if page.image and page.image != "" %},
+    "image": "{{ page.image }}"{% endif %}
+  }
+  </script>
+
+</div>
+<aside class="tool-sidebar"></aside>
+</div>
+
+<script>
+(async () => {
+  const currentSlug = {{ page.slug | jsonify }};
+  const currentDo = {{ page.doNm | jsonify }};
+  try {
+    const resp = await fetch('/search_index.json');
+    const all = await resp.json();
+    const nearby = all.filter(t => t.doNm === currentDo && t.slug !== currentSlug).slice(0, 6);
+    if (nearby.length > 0) {
+      document.getElementById('regionMountainGrid').innerHTML = nearby.map(itemCard).join('');
+    }
+  } catch(e) {}
+
+  function itemCard(t) {
+    if (t.kind === 'mountain') {
+      return `<a class="camp-card" href="/mountain/${t.slug}/">
+        ${t.image ? `<img class="camp-card-img" src="${t.image}" alt="${t.name}" loading="lazy">` : `<div class="camp-card-img-placeholder">⛰️</div>`}
+        <div class="camp-card-body">
+          <div class="camp-card-name">${t.name}</div>
+          <div class="camp-card-loc">📍 ${t.sigunguNm || ''}</div>
+        </div>
+      </a>`;
+    }
+    return `<a class="camp-card" href="/trail/${t.slug}/">
+      <div class="camp-card-body">
+        <div class="camp-card-name">${t.name}</div>
+        <div class="camp-card-loc">📍 ${t.sigunguNm || ''} · 📏 ${t.distanceKm}km</div>
+      </div>
+    </a>`;
+  }
+})();
+</script>

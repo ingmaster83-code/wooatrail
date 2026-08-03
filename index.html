@@ -1,17 +1,17 @@
 ---
 layout: default
-title: 우아트레일 - 전국 둘레길·트레킹길 정보 검색
-description: 전국 1,346개 둘레길·트레킹길·숲길 거리·소요시간·시작종료지점을 한눈에. 지리산둘레길, 해파랑길, 남해바래길부터 동네 산책길까지 지역별로 무료 검색하세요.
+title: 우아트레일 - 전국 둘레길·트레킹길·산 정보 검색
+description: 전국 1,346개 둘레길·트레킹길·숲길과 337개 산·오름 위치 정보를 한눈에. 지리산둘레길, 해파랑길, 남해바래길부터 동네 산책길, 명산·오름까지 지역별로 무료 검색하세요.
 ---
 
 <!-- 히어로 & 검색 -->
 <div class="hero">
-  <h1>🥾 전국 길·둘레길 정보</h1>
-  <p>길 이름 또는 지역으로 검색하세요</p>
+  <h1>🥾 전국 길·둘레길·산 정보</h1>
+  <p>길·산 이름 또는 지역으로 검색하세요</p>
   <div class="search-wrap">
     <input type="text" id="searchInput" class="search-input"
-           placeholder="예) 지리산둘레길, 제주, 트레킹..."
-           autocomplete="off" aria-label="길 검색">
+           placeholder="예) 지리산둘레길, 제주, 한라산, 오름..."
+           autocomplete="off" aria-label="길·산 검색">
     <button class="search-btn" onclick="doSearch()">🔍 검색</button>
   </div>
 </div>
@@ -114,6 +114,20 @@ function doSearch() {
 }
 
 function searchResultItem(t) {
+  if (t.kind === 'mountain') {
+    return `<div class="search-result-item">
+      <a href="/mountain/${t.slug}/">
+        <div class="search-result-thumb" style="background:#bbf7d0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border-radius:6px;overflow:hidden;">
+          ${t.image ? `<img src="${t.image}" alt="" style="width:100%;height:100%;object-fit:cover;">` : '⛰️'}
+        </div>
+        <div>
+          <div class="search-result-name">${t.name}</div>
+          <div class="search-result-loc">📍 ${t.doNm || ''} ${t.sigunguNm || ''}</div>
+          <span class="search-result-tag">⛰️ 산/오름</span>
+        </div>
+      </a>
+    </div>`;
+  }
   return `<div class="search-result-item">
     <a href="/trail/${t.slug}/">
       <div class="search-result-thumb" style="background:#d1fae5;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border-radius:6px;">🥾</div>

@@ -12,8 +12,13 @@ layout: default
   </nav>
 
   <div class="region-page-header">
+    {% if page.trails.size > 0 %}
     <h1>🥾 {{ page.doNm }} 길·둘레길</h1>
-    <p>총 {{ page.trails | size }}개 코스</p>
+    <p>총 {{ page.trails | size }}개 코스{% if page.mountains.size > 0 %} · 산·오름 {{ page.mountains | size }}개{% endif %}</p>
+    {% else %}
+    <h1>⛰️ {{ page.doNm }} 산·오름</h1>
+    <p>총 {{ page.mountains | size }}개</p>
+    {% endif %}
   </div>
 
   <!-- 광고 -->
@@ -23,6 +28,7 @@ layout: default
   </div>
 
   {% assign sigungu_groups = page.trails | group_by: "sigunguNm" | sort: "name" %}
+  {% assign item_counter = 0 %}
   {% for group in sigungu_groups %}
   <div style="margin-top:32px;">
     <h2 style="font-size:1.05rem;font-weight:700;margin-bottom:14px;">📍 {{ group.name }} <span style="color:#6B7280;font-weight:500;font-size:.85rem;">{{ group.items | size }}개</span></h2>
@@ -34,10 +40,52 @@ layout: default
           <div class="camp-card-loc">📏 {{ trail.distanceKm }}km · ⏱️ {{ trail.duration }}</div>
         </div>
       </a>
+      {% assign item_counter = item_counter | plus: 1 %}
+      {% assign item_rem = item_counter | modulo: 12 %}
+      {% if item_rem == 0 %}
+    </div>
+    <div class="ad-slot">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6464921081676309" data-ad-slot="7080296704" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <div class="camp-grid">
+      {% endif %}
       {% endfor %}
     </div>
   </div>
   {% endfor %}
+
+  {% if page.mountains.size > 0 %}
+  <div style="margin-top:48px;">
+    <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;">⛰️ {{ page.doNm }} 산·오름 <span style="color:#6B7280;font-weight:500;font-size:.85rem;">{{ page.mountains | size }}개</span></h2>
+    <div class="camp-grid">
+      {% assign m_counter = 0 %}
+      {% for m in page.mountains %}
+      <a class="camp-card" href="/mountain/{{ m.slug }}/">
+        {% if m.image and m.image != "" %}
+        <img class="camp-card-img" src="{{ m.image }}" alt="{{ m.name }}" loading="lazy">
+        {% else %}
+        <div class="camp-card-img-placeholder">⛰️</div>
+        {% endif %}
+        <div class="camp-card-body">
+          <div class="camp-card-name">{{ m.name }}</div>
+          <div class="camp-card-loc">📍 {{ m.sigunguNm }}</div>
+        </div>
+      </a>
+      {% assign m_counter = m_counter | plus: 1 %}
+      {% assign m_rem = m_counter | modulo: 12 %}
+      {% if m_rem == 0 %}
+    </div>
+    <div class="ad-slot">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6464921081676309" data-ad-slot="7080296704" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <div class="camp-grid">
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
   <div style="margin-top:48px;">
     <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;">다른 지역</h2>
