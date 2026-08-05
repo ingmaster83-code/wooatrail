@@ -1,7 +1,7 @@
 ---
 layout: default
-title: 우아트레일 - 전국 둘레길·트레킹길·산 정보 검색
-description: 전국 1,346개 둘레길·트레킹길·숲길과 337개 산·오름 위치 정보를 한눈에. 지리산둘레길, 해파랑길, 남해바래길부터 동네 산책길, 명산·오름까지 지역별로 무료 검색하세요.
+title: 우아트레일 - 전국 둘레길·트레킹길·산·자연명소 정보 검색
+description: 전국 1,346개 둘레길·트레킹길·숲길, 337개 산·오름, 234개 강·폭포·호수·동굴·약수터 위치 정보를 한눈에. 지리산둘레길, 해파랑길, 남해바래길부터 동네 산책길, 명산·오름, 자연명소까지 지역별로 무료 검색하세요.
 ---
 
 <!-- 히어로 & 검색 -->
@@ -74,8 +74,13 @@ let fuse = null;
 
 async function loadIndex() {
   if (fuseIndex) return;
-  const resp = await fetch('/search_index.json');
-  fuseIndex = await resp.json();
+  const [trailResp, natureResp] = await Promise.all([
+    fetch('/search_index.json'),
+    fetch('/nature_index.json'),
+  ]);
+  const trailData = await trailResp.json();
+  const natureData = await natureResp.json();
+  fuseIndex = trailData.concat(natureData);
   fuse = new Fuse(fuseIndex, {
     keys: ['name', 'doNm', 'sigunguNm', 'intro'],
     threshold: 0.35,
@@ -124,6 +129,20 @@ function searchResultItem(t) {
           <div class="search-result-name">${t.name}</div>
           <div class="search-result-loc">📍 ${t.doNm || ''} ${t.sigunguNm || ''}</div>
           <span class="search-result-tag">⛰️ 산/오름</span>
+        </div>
+      </a>
+    </div>`;
+  }
+  if (t.kind !== 'trail') {
+    return `<div class="search-result-item">
+      <a href="/nature/${t.slug}/">
+        <div class="search-result-thumb" style="background:#bfdbfe;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border-radius:6px;overflow:hidden;">
+          ${t.image ? `<img src="${t.image}" alt="" style="width:100%;height:100%;object-fit:cover;">` : (t.kindIcon || '🏞️')}
+        </div>
+        <div>
+          <div class="search-result-name">${t.name}</div>
+          <div class="search-result-loc">📍 ${t.doNm || ''} ${t.sigunguNm || ''}</div>
+          <span class="search-result-tag">${t.kindIcon || ''} ${t.kindLabel || ''}</span>
         </div>
       </a>
     </div>`;

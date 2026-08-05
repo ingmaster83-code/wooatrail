@@ -8,7 +8,8 @@ module Jekyll
     def generate(site)
       trails = load_json(site, '_rawdata/trails.json')
       mountains = load_json(site, '_rawdata/mountains.json')
-      return if trails.empty? && mountains.empty?
+      nature = load_json(site, '_rawdata/nature_spots.json')
+      return if trails.empty? && mountains.empty? && nature.empty?
 
       Jekyll.logger.info "TrailGenerator:", "#{trails.size}개 길 페이지 생성 중..."
 
@@ -24,17 +25,26 @@ module Jekyll
         site.pages << MountainPage.new(site, m)
       end
 
-      all_regions = (trails.map { |t| t['doNm'] } + mountains.map { |m| m['doNm'] }).uniq
+      Jekyll.logger.info "TrailGenerator:", "#{nature.size}개 자연명소 페이지 생성 중..."
+
+      nature.each do |n|
+        next if n['slug'].to_s.strip.empty?
+        site.pages << NaturePage.new(site, n)
+      end
+
+      all_regions = (trails.map { |t| t['doNm'] } + mountains.map { |m| m['doNm'] } + nature.map { |n| n['doNm'] }).uniq
       all_regions.each do |do_nm|
         next if do_nm.to_s.strip.empty?
         do_trails = trails.select { |t| t['doNm'] == do_nm }
         do_mountains = mountains.select { |m| m['doNm'] == do_nm }
-        site.pages << RegionPage.new(site, do_nm, do_trails, do_mountains)
+        do_nature = nature.select { |n| n['doNm'] == do_nm }
+        site.pages << RegionPage.new(site, do_nm, do_trails, do_mountains, do_nature)
       end
 
       site.pages << SearchIndexPage.new(site, trails, mountains)
+      site.pages << NatureSearchIndexPage.new(site, nature)
 
-      Jekyll.logger.info "TrailGenerator:", "완료 (길 #{trails.size}개 + 산/오름 #{mountains.size}개)"
+      Jekyll.logger.info "TrailGenerator:", "완료 (길 #{trails.size}개 + 산/오름 #{mountains.size}개 + 자연명소 #{nature.size}개)"
     end
 
     private
@@ -111,8 +121,38 @@ module Jekyll
     end
   end
 
+  class NaturePage < Page
+    def initialize(site, n)
+      @site = site
+      @base = site.source
+      @dir  = "nature/#{n['slug']}"
+      @name = 'index.html'
+
+      self.process(@name)
+      self.read_yaml(File.join(@base, '_layouts'), 'nature.html')
+      n_data = n.dup
+      n_data['natureName'] = n_data.delete('name')
+      self.data.merge!(n_data)
+      self.data['layout']      = 'nature'
+      self.data['title']       = build_title(n)
+      self.data['description'] = build_desc(n)
+    end
+
+    private
+
+    def build_title(n)
+      loc = [n['doNm'], n['sigunguNm']].compact.join(' ')
+      "#{n['name']} #{loc} #{n['kindLabel']} 위치 정보"
+    end
+
+    def build_desc(n)
+      loc = [n['doNm'], n['sigunguNm']].compact.join(' ')
+      "#{loc} #{n['name']}(#{n['kindLabel']}) 위치, 이용시간, 주차 정보를 확인하세요."[0, 155]
+    end
+  end
+
   class RegionPage < Page
-    def initialize(site, do_nm, trails, mountains = [])
+    def initialize(site, do_nm, trails, mountains = [], nature = [])
       @site = site
       @base = site.source
       @dir  = "region/#{do_nm}"
@@ -124,12 +164,13 @@ module Jekyll
       self.data['doNm']      = do_nm
       self.data['trails']    = trails
       self.data['mountains'] = mountains
+      self.data['nature']    = nature
       if trails.size > 0
         self.data['title']       = "#{do_nm} 둘레길·트레킹길 정보"
-        self.data['description'] = "#{do_nm} 둘레길·트레킹길 #{trails.size}개, 산·오름 #{mountains.size}개 목록. 거리, 소요시간, 시작·종료 지점을 확인하세요."
+        self.data['description'] = "#{do_nm} 둘레길·트레킹길 #{trails.size}개, 산·오름 #{mountains.size}개, 자연명소 #{nature.size}개 목록. 거리, 소요시간, 시작·종료 지점을 확인하세요."
       else
-        self.data['title']       = "#{do_nm} 산·오름 정보"
-        self.data['description'] = "#{do_nm} 산·오름 #{mountains.size}개 목록. 위치, 이용시간, 주차 정보를 확인하세요."
+        self.data['title']       = "#{do_nm} 산·오름·자연명소 정보"
+        self.data['description'] = "#{do_nm} 산·오름 #{mountains.size}개, 자연명소 #{nature.size}개 목록. 위치, 이용시간, 주차 정보를 확인하세요."
       end
     end
   end
@@ -169,6 +210,36 @@ module Jekyll
       end
 
       index = trail_index + mountain_index
+
+      self.content = index.to_json
+    end
+
+    def output   = self.content
+    def render(layouts, registers); end
+  end
+
+  class NatureSearchIndexPage < Page
+    def initialize(site, nature)
+      @site = site
+      @base = site.source
+      @dir  = ''
+      @name = 'nature_index.json'
+
+      self.process(@name)
+      self.data = { 'layout' => nil, 'sitemap' => false }
+
+      index = nature.map do |n|
+        {
+          'kind'      => n['kind'],
+          'kindLabel' => n['kindLabel'],
+          'kindIcon'  => n['kindIcon'],
+          'slug'      => n['slug'],
+          'name'      => n['name'],
+          'doNm'      => n['doNm'],
+          'sigunguNm' => n['sigunguNm'],
+          'image'     => n['image'],
+        }
+      end
 
       self.content = index.to_json
     end

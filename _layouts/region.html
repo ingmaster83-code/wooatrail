@@ -14,10 +14,10 @@ layout: default
   <div class="region-page-header">
     {% if page.trails.size > 0 %}
     <h1>🥾 {{ page.doNm }} 길·둘레길</h1>
-    <p>총 {{ page.trails | size }}개 코스{% if page.mountains.size > 0 %} · 산·오름 {{ page.mountains | size }}개{% endif %}</p>
+    <p>총 {{ page.trails | size }}개 코스{% if page.mountains.size > 0 %} · 산·오름 {{ page.mountains | size }}개{% endif %}{% if page.nature.size > 0 %} · 자연명소 {{ page.nature | size }}개{% endif %}</p>
     {% else %}
-    <h1>⛰️ {{ page.doNm }} 산·오름</h1>
-    <p>총 {{ page.mountains | size }}개</p>
+    <h1>⛰️ {{ page.doNm }} 산·오름·자연명소</h1>
+    <p>산·오름 {{ page.mountains | size }}개{% if page.nature.size > 0 %} · 자연명소 {{ page.nature | size }}개{% endif %}</p>
     {% endif %}
   </div>
 
@@ -84,6 +84,42 @@ layout: default
       {% endif %}
       {% endfor %}
     </div>
+  </div>
+  {% endif %}
+
+  {% if page.nature.size > 0 %}
+  <div style="margin-top:48px;">
+    <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;">🏞️ {{ page.doNm }} 자연명소 <span style="color:#6B7280;font-weight:500;font-size:.85rem;">{{ page.nature | size }}개</span></h2>
+    {% assign kind_groups = page.nature | group_by: "kindLabel" %}
+    {% assign n_counter = 0 %}
+    {% for kg in kind_groups %}
+    <h3 style="font-size:.95rem;font-weight:600;margin:20px 0 12px;color:#374151;">{{ kg.items.first.kindIcon }} {{ kg.name }} <span style="color:#9CA3AF;font-weight:500;font-size:.82rem;">{{ kg.items | size }}개</span></h3>
+    <div class="camp-grid">
+      {% for n in kg.items %}
+      <a class="camp-card" href="/nature/{{ n.slug }}/">
+        {% if n.image and n.image != "" %}
+        <img class="camp-card-img" src="{{ n.image }}" alt="{{ n.name }}" loading="lazy">
+        {% else %}
+        <div class="camp-card-img-placeholder">{{ n.kindIcon }}</div>
+        {% endif %}
+        <div class="camp-card-body">
+          <div class="camp-card-name">{{ n.name }}</div>
+          <div class="camp-card-loc">📍 {{ n.sigunguNm }}</div>
+        </div>
+      </a>
+      {% assign n_counter = n_counter | plus: 1 %}
+      {% assign n_rem = n_counter | modulo: 24 %}
+      {% if n_rem == 0 %}
+    </div>
+    <div class="ad-slot">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6464921081676309" data-ad-slot="7080296704" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <div class="camp-grid">
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
   </div>
   {% endif %}
 
