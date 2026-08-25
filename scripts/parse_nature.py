@@ -14,6 +14,10 @@ CATEGORIES = {
     "lake": {"label": "호수", "icon": "🌊"},
     "cave": {"label": "동굴", "icon": "🕳️"},
     "spring": {"label": "약수터", "icon": "💧"},
+    "national_park": {"label": "국립공원", "icon": "🏔️"},
+    "provincial_park": {"label": "도립공원", "icon": "⛰️"},
+    "county_park": {"label": "군립공원", "icon": "🗻"},
+    "eco_park": {"label": "생태공원", "icon": "🌳"},
 }
 
 SIDO_ALIAS = {

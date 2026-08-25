@@ -13,7 +13,8 @@ INTRO_URL = "https://apis.data.go.kr/B551011/KorService2/detailIntro2"
 SCRIPT_DIR = os.path.dirname(__file__)
 OUT_DIR = os.path.join(SCRIPT_DIR, "..", "_rawdata")
 
-CATEGORIES = ["river", "waterfall", "lake", "cave", "spring"]
+CATEGORIES = ["river", "waterfall", "lake", "cave", "spring",
+              "national_park", "provincial_park", "county_park", "eco_park"]
 
 INTRO_FIELDS = [
     "infocenter", "opendate", "restdate", "expguide", "expagerange",

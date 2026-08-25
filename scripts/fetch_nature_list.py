@@ -16,6 +16,10 @@ CATEGORIES = {
     "lake": "A01011700",
     "cave": "A01011900",
     "spring": "A01011000",
+    "national_park": "A01010100",
+    "provincial_park": "A01010200",
+    "county_park": "A01010300",
+    "eco_park": "A01010500",
 }
 
 
