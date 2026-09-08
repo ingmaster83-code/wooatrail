@@ -23,6 +23,8 @@ CATEGORIES = {
 SIDO_ALIAS = {
     "강원도": "강원특별자치도",
     "전라북도": "전북특별자치도",
+    "경남": "경상남도",
+    "세종특별자치시도": "세종특별자치시",
 }
 
 GWANGJU_HINTS = ("동구", "서구", "남구", "북구", "광산구")
@@ -113,10 +115,76 @@ def parse_category(key, meta):
     return out
 
 
+def parse_drinkwater():
+    """국립환경과학원 수질DB(_rawdata/list_raw_drinkwater.json) -> 공통 스키마 + 수질검사 부가필드.
+    기존 TourAPI 기반 spring(16곳, 관광명소용 사진·소개글 위주)과는 별개 카테고리로 추가함 —
+    이쪽은 사진/소개글이 없는 대신 실제 정부 수질검사 결과(적합/부적합)를 담고 있어 값이 다름."""
+    src = ROOT / "_rawdata" / "list_raw_drinkwater.json"
+    if not src.exists():
+        return []
+    items = json.loads(src.read_text(encoding="utf-8"))
+
+    out = []
+    skipped = 0
+    for idx, it in enumerate(items):
+        name = (it.get("SPOT_NM") or "").strip()
+        addr = (it.get("ADRES") or "").strip()
+        if not name or not addr:
+            skipped += 1
+            continue
+
+        do_nm = SIDO_ALIAS.get(it.get("DO_NM"), it.get("DO_NM")) or ""
+        sigungu = (it.get("CTY_NM") or "").strip()
+        if not do_nm:
+            do_nm, sigungu2 = parse_sido_sigungu(addr)
+            sigungu = sigungu or sigungu2
+        if not do_nm:
+            skipped += 1
+            continue
+
+        accept = (it.get("ACCEPT_YN") or "").strip()
+
+        out.append({
+            "name": name,
+            "doNm": do_nm,
+            "sigunguNm": sigungu,
+            "address": addr,
+            "phone": (it.get("OFFICE_TEL") or "").strip(),
+            "latitude": "",
+            "longitude": "",
+            "slug": slugify("drinkwater", name, idx),
+            "overview": "",
+            "image": "",
+            "usetime": "",
+            "restdate": "",
+            "parking": "",
+            "kind": "drinkwater",
+            "kindLabel": "약수터(수질검사)",
+            "kindIcon": "💧",
+            # 수질검사 부가정보
+            "waterAccept": accept,
+            "waterYear": (it.get("YYYY") or "").strip(),
+            "waterPeriod": (it.get("PERIOD") or "").strip(),
+            "waterSuit": (it.get("SUIT") or "").strip(),
+            "waterUnsuit": (it.get("UNSUIT") or "").strip(),
+            "waterFailDesc": (it.get("FAIL_DESC") or "").strip(),
+            "waterPh": (it.get("ITEM_PH") or "").strip(),
+            "waterTurbidity": (it.get("ITEM_MUDDY") or "").strip(),
+            "waterColiform": (it.get("ITEM_TOTBAC") or "").strip(),
+            "waterEcoli": (it.get("ITEM_FESTR") or "").strip(),
+            "waterInstt": (it.get("OFFICE") or it.get("INFO_CREAT_INSTT_NM") or "").strip(),
+            "waterDayAvg": (it.get("DAY_AVG") or "").strip(),
+        })
+
+    print(f"[drinkwater] {len(items)}건 중 {len(out)}개 저장, {skipped}개 스킵")
+    return out
+
+
 def main():
     all_spots = []
     for key, meta in CATEGORIES.items():
         all_spots.extend(parse_category(key, meta))
+    all_spots.extend(parse_drinkwater())
 
     OUT.write_text(json.dumps(all_spots, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n총 {len(all_spots)}개 -> {OUT}")

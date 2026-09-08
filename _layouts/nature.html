@@ -47,6 +47,53 @@ layout: default
   </div>
   {% endif %}
 
+  <!-- 수질검사 결과 (약수터(수질검사) 전용) -->
+  {% if page.waterAccept and page.waterAccept != "" %}
+  <div class="camp-section">
+    <h2>💧 먹는물 수질검사 결과</h2>
+    <p style="margin-bottom:12px;">
+      {% if page.waterAccept == "적합" %}
+      <span style="display:inline-block;background:#DCFCE7;color:#166534;font-weight:700;padding:6px 14px;border-radius:20px;font-size:.9rem;">✅ 적합</span>
+      {% else %}
+      <span style="display:inline-block;background:#FEE2E2;color:#991B1B;font-weight:700;padding:6px 14px;border-radius:20px;font-size:.9rem;">⚠️ 부적합</span>
+      {% endif %}
+      <span style="color:#6B7280;font-size:.85rem;margin-left:8px;">{{ page.waterYear }}년 {{ page.waterPeriod }}분기 검사</span>
+    </p>
+    {% if page.waterAccept != "적합" and page.waterFailDesc and page.waterFailDesc != "" %}
+    <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:.88rem;color:#991B1B;">
+      부적합 사유: {{ page.waterFailDesc }}
+    </div>
+    {% endif %}
+    <table style="width:100%;border-collapse:collapse;font-size:.92rem;">
+      {% if page.waterSuit and page.waterSuit != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;width:130px;">적합 항목 수</td><td>{{ page.waterSuit }}개</td></tr>
+      {% endif %}
+      {% if page.waterUnsuit and page.waterUnsuit != "" and page.waterUnsuit != "0" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">부적합 항목 수</td><td style="color:#DC2626;font-weight:600;">{{ page.waterUnsuit }}개</td></tr>
+      {% endif %}
+      {% if page.waterPh and page.waterPh != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">pH(수소이온농도)</td><td>{{ page.waterPh }}</td></tr>
+      {% endif %}
+      {% if page.waterTurbidity and page.waterTurbidity != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">탁도</td><td>{{ page.waterTurbidity }}</td></tr>
+      {% endif %}
+      {% if page.waterColiform and page.waterColiform != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">총대장균군</td><td>{{ page.waterColiform }}</td></tr>
+      {% endif %}
+      {% if page.waterEcoli and page.waterEcoli != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">대장균(분원성대장균군)</td><td>{{ page.waterEcoli }}</td></tr>
+      {% endif %}
+      {% if page.waterDayAvg and page.waterDayAvg != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">일평균 이용인원</td><td>{{ page.waterDayAvg }}명</td></tr>
+      {% endif %}
+      {% if page.waterInstt and page.waterInstt != "" %}
+      <tr><td style="padding:8px 0;color:#6B7280;">관리기관</td><td>{{ page.waterInstt }}</td></tr>
+      {% endif %}
+    </table>
+    <p style="margin-top:12px;font-size:.8rem;color:#9CA3AF;">※ 국립환경과학원 수질DB(먹는물 공동시설 운영결과) 기준이며, 실제 수질은 계절·강수량에 따라 달라질 수 있습니다. 방문 전 최신 정보를 관리기관에 확인하세요.</p>
+  </div>
+  {% endif %}
+
   <!-- 이용 정보 -->
   {% if page.usetime and page.usetime != "" or page.restdate and page.restdate != "" or page.parking and page.parking != "" %}
   <div class="camp-section">
