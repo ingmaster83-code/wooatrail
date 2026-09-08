@@ -4,3 +4,5 @@ _extracted2/
 *.json.bak
 _site/
 .jekyll-cache/
+__pycache__/
+*.pyc
